@@ -25,23 +25,26 @@ class LoginHandler(SimpleHTTPRequestHandler):
             print(f"404 Not Found: {self.path}")  # Debugging line
             self.send_error(404, "File Not Found")
 
-    def do_POST(self):
-        if self.path == '/auth':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            params = urllib.parse.parse_qs(post_data.decode('utf-8'))
 
-            username = params.get('username', [''])[0]
-            password = params.get('password', [''])[0]
-            license = params.get('license', [''])[0]
+def do_POST(self):
+    if self.path == '/auth':
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
+        params = urllib.parse.parse_qs(post_data.decode('utf-8'))
+        # Handle authentication here
+        username = params.get('username', [''])[0]
+        password = params.get('password', [''])[0]
+        license = params.get('license', [''])[0]
 
-            # Perform KeyAuth authentication here
-            response = self.authenticate_with_keyauth(username, password, license)
+        response = self.authenticate_with_keyauth(username, password, license)
 
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(response).encode())
+        self.send_response(200)
+        self.send_header('Content-type', 'application/json')
+        self.end_headers()
+        self.wfile.write(json.dumps(response).encode())
+    else:
+        self.send_error(404, "File Not Found")
+)
 
     def authenticate_with_keyauth(self, username, password, license):
         # KeyAuth 1.3 API setup (ensure to replace with actual API details)
@@ -77,11 +80,12 @@ class LoginHandler(SimpleHTTPRequestHandler):
         # Implement your checksum logic here
         return "your_checksum_here"  # Replace with actual checksum logic
 
-def run(server_class=HTTPServer, handler_class=LoginHandler, port=8080):
+def run(server_class=HTTPServer, handler_class=LoginHandler, port=8000):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     print(f'Starting server on port {port}')
     httpd.serve_forever()
+
 
 if __name__ == "__main__":
     run()
