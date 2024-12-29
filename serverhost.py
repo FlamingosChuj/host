@@ -47,7 +47,7 @@ class LoginHandler(SimpleHTTPRequestHandler):
         else:
             return {"status": "failure", "message": "Invalid credentials"}
 
-def run(server_class=HTTPServer, handler_class=LoginHandler, port=8000):
+def run(server_class=HTTPServer, handler_class=LoginHandler, port=8080):
     server_address = ('', port)
     httpd = server_class(server_address, handler_class)
     print(f'Starting server on port {port}')
