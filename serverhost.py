@@ -2,6 +2,7 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 import urllib.parse
 import json
 import os
+import requests  # You'll need to install the requests library to interact with the KeyAuth API
 
 class LoginHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -41,11 +42,36 @@ class LoginHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode())
 
     def authenticate_with_keyauth(self, username, password, license):
+        keyauthapp = {
+            "name": "ThunderBomba",  # App name
+            "ownerid": "kpIZyBSyCI",  # Account ID
+            "version": "1.0",  # Application version
+        }
+
         # Replace this with actual KeyAuth API call
-        if username == "test" and password == "test" and license == "test":
-            return {"status": "success", "message": "Logged in successfully"}
-        else:
-            return {"status": "failure", "message": "Invalid credentials"}
+        api_url = "https://api.keyauth.cc/api/validate"  # KeyAuth API endpoint
+
+        data = {
+            "username": username,
+            "password": password,
+            "license": license,
+            "hash_to_check": self.getchecksum(),  # You should replace this with your actual checksum function
+        }
+
+        try:
+            response = requests.post(api_url, json=data)
+            result = response.json()
+
+            if result.get("status") == "success":
+                return {"status": "success", "message": "Logged in successfully"}
+            else:
+                return {"status": "failure", "message": "Invalid credentials"}
+        except Exception as e:
+            return {"status": "failure", "message": f"Error with KeyAuth API: {str(e)}"}
+
+    def getchecksum(self):
+        # This method should return a checksum of your application to match the KeyAuth API
+        return "your_checksum_here"  # Replace with your actual checksum logic
 
 def run(server_class=HTTPServer, handler_class=LoginHandler, port=8080):
     server_address = ('', port)
