@@ -44,17 +44,26 @@ class LoginHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode())
 
     def authenticate_with_keyauth(self, username, password, license):
-        # KeyAuth API setup (ensure to replace with actual API details)
+        # KeyAuth 1.3 API setup (ensure to replace with actual API details)
         api_url = "https://api.keyauth.cc/api/validate"  # KeyAuth API endpoint
         data = {
             "username": username,
             "password": password,
             "license": license,
             "hash_to_check": self.getchecksum(),  # Replace with actual checksum logic
+            "name": "ThunderBomba",  # Your app name
+            "ownerid": "kpIZyBSyCI",  # Your account ID
+            "version": "1.0"  # Your app version
         }
 
         try:
             response = requests.post(api_url, json=data)
+            
+            # Check if the response status code is 200
+            if response.status_code != 200:
+                return {"status": "failure", "message": f"API request failed with status code {response.status_code}"}
+            
+            # Parse the response JSON
             result = response.json()
 
             if result.get("status") == "success":
