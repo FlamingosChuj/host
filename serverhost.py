@@ -2,7 +2,7 @@ from http.server import SimpleHTTPRequestHandler, HTTPServer
 import urllib.parse
 import json
 import os
-import requests  # You'll need to install the requests library to interact with the KeyAuth API
+import requests  # Ensure you have the requests library installed
 
 class LoginHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
@@ -14,6 +14,7 @@ class LoginHandler(SimpleHTTPRequestHandler):
                 # Ensure the file path is correct
                 script_dir = os.path.dirname(__file__)
                 file_path = os.path.join(script_dir, 'login.html')
+                print(f"Looking for file: {file_path}")  # Debugging line
                 with open(file_path, 'rb') as file:
                     self.wfile.write(file.read())
                 print("Served login.html")
@@ -21,6 +22,7 @@ class LoginHandler(SimpleHTTPRequestHandler):
                 print(f"Error serving login.html: {e}")
                 self.send_error(500, "Internal Server Error")
         else:
+            print(f"404 Not Found: {self.path}")  # Debugging line
             self.send_error(404, "File Not Found")
 
     def do_POST(self):
@@ -42,20 +44,13 @@ class LoginHandler(SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(response).encode())
 
     def authenticate_with_keyauth(self, username, password, license):
-        keyauthapp = {
-            "name": "ThunderBomba",  # App name
-            "ownerid": "kpIZyBSyCI",  # Account ID
-            "version": "1.0",  # Application version
-        }
-
-        # Replace this with actual KeyAuth API call
+        # KeyAuth API setup (ensure to replace with actual API details)
         api_url = "https://api.keyauth.cc/api/validate"  # KeyAuth API endpoint
-
         data = {
             "username": username,
             "password": password,
             "license": license,
-            "hash_to_check": self.getchecksum(),  # You should replace this with your actual checksum function
+            "hash_to_check": self.getchecksum(),  # Replace with actual checksum logic
         }
 
         try:
@@ -70,8 +65,8 @@ class LoginHandler(SimpleHTTPRequestHandler):
             return {"status": "failure", "message": f"Error with KeyAuth API: {str(e)}"}
 
     def getchecksum(self):
-        # This method should return a checksum of your application to match the KeyAuth API
-        return "your_checksum_here"  # Replace with your actual checksum logic
+        # Implement your checksum logic here
+        return "your_checksum_here"  # Replace with actual checksum logic
 
 def run(server_class=HTTPServer, handler_class=LoginHandler, port=8080):
     server_address = ('', port)
